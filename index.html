@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ACA - Boutique de Luxe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Open+Sans&display=swap" rel="stylesheet" />
+  <style>
+    body { margin:0; font-family:'Open Sans',sans-serif; background:#f7f7f7; color:#333; }
+    header, nav, footer { text-align:center; }
+    header { background:#000; color:#fff; padding:40px 20px; }
+    header h1{ font-family:'Playfair Display', serif; font-size:3rem; letter-spacing:2px; margin:0; }
+    nav{ display:flex; justify-content:center; background:#111; padding:10px 0; }
+    nav a{ color:#fff; text-decoration:none; margin:0 15px; font-weight:bold; transition:color .3s; }
+    nav a:hover{color:#bfa46f;}
+    .hero{ text-align:center; padding:60px 20px; background:url('https://images.unsplash.com/photo-1616627981460-9078c8edcd96?auto=format&fit=crop&w=1350&q=80')center/cover; color:#fff; }
+    .hero h2{ font-family:'Playfair Display',serif; font-size:2.5rem; margin-bottom:10px; }
+    .products, .blog-list{ padding:60px 20px; max-width:1200px; margin:auto; display:grid; gap:30px; }
+    .products{ grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+    .product, .blog-item{ background:#fff; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); overflow:hidden; transition:transform .3s; }
+    .product:hover, .blog-item:hover{transform:translateY(-5px);}
+    .product img, .blog-item img{width:100%; height:auto;}
+    .product-info, .blog-info{ padding:20px; text-align:center; }
+    .product-info h3,.blog-info h3{ font-family:'Playfair Display',serif; margin-bottom:10px;}
+    .product-info p, .blog-info p { color:#777; }
+    .button, .cart-toggle{ display:inline-block; padding:12px 24px; background:#000; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold; cursor:pointer; transition:background .3s; }
+    .button:hover, .cart-toggle:hover{background:#bfa46f;}
+    #cart{position:fixed;top:80px;right:20px;width:300px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.2);padding:20px;display:none;border-radius:10px;max-height:80vh;overflow:auto;}
+    #cart h3{margin-top:0;}
+    #cart ul{list-style:none;padding:0;}
+    #cart li{margin-bottom:10px;display:flex;justify-content:space-between;}
+    #cart-total{font-weight:bold;margin-top:10px;}
+  </style>
+</head>
+<body>
+
+  <header><h1>ACA</h1><p>L’élégance à portée de main</p></header>
+  <nav>
+    <a href="#hero">Accueil</a>
+    <a href="#products">Produits</a>
+    <a href="#blogs">Blog</a>
+    <a class="cart-toggle">Panier (<span id="cart-count">0</span>)</a>
+  </nav>
+
+  <section id="hero" class="hero">
+    <h2>Découvrez l'univers du luxe</h2>
+    <p>Des pièces rares, intemporelles, soigneusement sélectionnées.</p>
+  </section>
+
+  <section id="products" class="products"></section>
+
+  <section id="blogs" class="blog-list"></section>
+
+  <div id="cart">
+    <h3>Mon panier</h3>
+    <ul id="cart-items"></ul>
+    <p id="cart-total">Total : 0 €</p>
+    <button class="button" onclick="checkout()">Passer à la caisse</button>
+  </div>
+
+  <footer>&copy; 2025 ACA Boutique de Luxe – Tous droits réservés.</footer>
+
+  <script>
+    const products = [
+      {id:1,name:"Sac en cuir ACA",price:790,img:"https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=600&q=80"},
+      {id:2,name:"Montre Or Blanc",price:2400,img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80"},
+      {id:3,name:"Parfum ACA Signature",price:180,img:"https://images.unsplash.com/photo-1600180758890-6eeb3692d644?auto=format&fit=crop&w=600&q=80"}
+    ];
+    const articles = [
+      {id:1,title:"Tendances du luxe 2025",img:"https://images.unsplash.com/photo-1516387938699-a93567ec168e?auto=format&fit=crop&w=600&q=80",excerpt:"Découvrez ce qui va marquer le monde du luxe en 2025."},
+      {id:2,title:"Comment entretenir votre sac en cuir",img:"https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80",excerpt:"Guide pratique pour préserver votre sac haut de gamme."}
+    ];
+    let cart = [];
+
+    function renderProducts(){
+      const el = document.getElementById("products");
+      products.forEach(p=>{
+        const div=document.createElement("div"); div.className="product";
+        div.innerHTML=`
+          <img src="${p.img}" alt="${p.name}">
+          <div class="product-info">
+            <h3>${p.name}</h3>
+            <p>${p.price} €</p>
+            <a class="button" onclick="addToCart(${p.id})">Ajouter au panier</a>
+          </div>`;
+        el.appendChild(div);
+      });
+    }
+
+    function renderBlog(){
+      const el=document.getElementById("blogs");
+      const header=document.createElement("h2");
+      header.textContent="Notre blog Luxe & Lifestyle";
+      el.appendChild(header);
+      articles.forEach(a=>{
+        const div=document.createElement("div"); div.className="blog-item";
+        div.innerHTML=`
+          <img src="${a.img}" alt="${a.title}">
+          <div class="blog-info">
+            <h3>${a.title}</h3><p>${a.excerpt}</p><a class="button" onclick="viewArticle(${a.id})">Lire la suite</a>
+          </div>`;
+        el.appendChild(div);
+      });
+    }
+
+    function addToCart(id){
+      const p = products.find(x=>x.id===id);
+      cart.push(p);
+      updateCart();
+      alert(p.name+" ajouté au panier !");
+    }
+
+    function updateCart(){
+      document.getElementById("cart-count").textContent = cart.length;
+      const ul = document.getElementById("cart-items");
+      ul.innerHTML = "";
+      let total=0;
+      cart.forEach((p,i)=>{
+        total+=p.price;
+        const li=document.createElement("li");
+        li.textContent=`${p.name} (${p.price} €)`;
+        const btn = document.createElement("button"); btn.textContent="×"; btn.onclick=()=>{cart.splice(i,1);updateCart();};
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
+      document.getElementById("cart-total").textContent="Total : "+total+" €";
+    }
+
+    document.querySelector(".cart-toggle").onclick = () => {
+      const cartEl = document.getElementById("cart");
+      cartEl.style.display = cartEl.style.display==="block"?"none":"block";
+    };
+
+    function checkout(){
+      if(cart.length===0){ alert("Ton panier est vide."); return; }
+      alert("Merci pour votre achat ! Montant : " + cart.reduce((a,b)=>a+b.price,0) + " €");
+      cart = []; updateCart();
+      document.getElementById("cart").style.display="none";
+    }
+
+    function viewArticle(id){
+      const a = articles.find(x=>x.id===id);
+      document.body.innerHTML = `
+        <header><h1>ACA</h1><p>Blog Luxe & Lifestyle</p></header>
+        <nav><a href="#" onclick="location.reload()">Retour</a></nav>
+        <section style="padding:60px 20px;max-width:800px;margin:auto;background:#fff;border-radius:10px;">
+          <h2>${a.title}</h2><img src="${a.img}" style="width:100%;border-radius:10px;margin:20px 0;"><p style="font-size:1.1rem;color:#555;">${a.excerpt}... (contenu complet de l'article ici).</p>
+        </section>
+      `;
+    }
+
+    window.onload = () => { renderProducts(); renderBlog(); };
+  </script>
+</body>
+</html>
